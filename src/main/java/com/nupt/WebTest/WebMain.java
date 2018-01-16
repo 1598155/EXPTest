@@ -104,12 +104,57 @@ public static void login() throws Exception {
 		Response login = con2.ignoreContentType(true).method(Method.POST)
 				.data(datas).cookies(rs.cookies()).execute();
 		// 打印，登陆成功后的信息
-		System.out.println(login.body());
+        Document doc = login.parse();
+       String res = doc.text();
+       if(res.contains("成功登录"))
+       {
+    	   System.out.println("Login Success");
+       }
+
+       Connection resCon = Jsoup.connect("http://192.168.168.168");
+       resCon.header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36");
+       Response res1 = resCon.execute();
+       doc = res1.parse();
+      Elements es = doc.getElementsByTag("script");
+     
+          
+      //获取网页参数值
+          HashMap<String, String> perinf = new HashMap<String, String>();
+    	 //System.out.println(es.get(0).data());
+    	  String[] data = es.get(0).data().trim().split("=");
+    	  int j = 0;
+    	  for(int i = 0 ;i < data.length ; i++ )
+    	  {
+    		  
+    		  if(j==3)
+    			  break;
+    		  if(data[i].contains("time"))
+    		  {
+    			perinf.put("time", data[i+1].split(";")[0].substring(1, data[i+1].split(";")[0].length()-1)); 
+    			j++;
+    			
+    		  }
+    		  if(data[i].contains("flow"))
+    		  {
+    			perinf.put("flow", data[i+1].split(";")[0].substring(1, data[i+1].split(";")[0].length()-1)); 
+    			j++;
+    		  }
+    		  if(data[i].contains("fee"))
+    		  {
+    			perinf.put("fee", data[i+1].split(";")[0].substring(1, data[i+1].split(";")[0].length()-1)); 
+    			j++;
+    		  }
+    		  
+    	  }
+    	  System.out.println(perinf);
+		
+	
+      
+        
+        
+		
 		// 登陆成功后的cookie信息，可以保存到本地，以后登陆时，只需一次登陆即可
-		Map<String, String> map = login.cookies();
-		for (String s : map.keySet()) {
-			System.out.println(s + "      " + map.get(s));
-		}
+		
 	}
 
 
